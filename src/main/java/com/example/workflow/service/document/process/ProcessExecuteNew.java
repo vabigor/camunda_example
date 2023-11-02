@@ -35,7 +35,8 @@ public class ProcessExecuteNew implements ProcessExecute{
         Document document = documentServiceDao.findById(docId, user).orElseThrow();
         Process process = processServiceDao.findById(document.getProcessId(), user).orElseThrow();
         Task task = taskService.createTaskQuery().processInstanceId(process.getProcessInstanceId()).taskId(document.getTaskId()).singleResult();
-        taskService.complete(task.getId(), Map.of("lastStepResult", result.isResult()));
+//        taskService.complete(task.getId(), Map.of("lastStepResult", result.isResult()));
+        taskService.complete(process.getProcessInstanceId(), Map.of("lastStepResult", result.isResult()));
         System.out.println("New execute");
     }
 

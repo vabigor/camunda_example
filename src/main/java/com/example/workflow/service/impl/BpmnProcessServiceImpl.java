@@ -1,5 +1,6 @@
 package com.example.workflow.service.impl;
 
+import camundajar.impl.com.google.gson.InstanceCreator;
 import com.example.workflow.service.BpmnProcessService;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.RepositoryService;
@@ -15,6 +16,11 @@ import org.camunda.bpm.engine.task.Task;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.instance.Process;
+import org.camunda.bpm.model.bpmn.instance.UserTask;
+import org.camunda.bpm.model.xml.ModelBuilder;
+import org.camunda.bpm.model.xml.impl.instance.ModelElementInstanceImpl;
+import org.camunda.bpm.model.xml.instance.ModelElementInstance;
+import org.camunda.bpm.model.xml.type.ModelElementType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Pageable;
@@ -55,11 +61,13 @@ public class BpmnProcessServiceImpl implements BpmnProcessService {
     public void upload(HttpServletRequest request, HttpServletResponse resp) throws IOException, ServletException, JAXBException {
 
         BpmnModelInstance bpmnModelInstance = Bpmn.readModelFromStream(request.getPart("bp").getInputStream());
+
         bpmnModelInstance.getModelElementsByType(Process.class).stream().toList().forEach(p->p.setId("org114_"+UUID.randomUUID()));
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Bpmn.writeModelToStream(outputStream, bpmnModelInstance);
 
         RepositoryService repositoryService = processEngine.getRepositoryService();
+
         DeploymentBuilder deploymentBuilder = repositoryService.createDeployment().enableDuplicateFiltering(true).name("self").tenantId(null);
         deploymentBuilder.addInputStream(request.getPart("bp").getSubmittedFileName(), new ByteArrayInputStream(outputStream.toByteArray()));
         Deployment deploy = deploymentBuilder.deploy();
